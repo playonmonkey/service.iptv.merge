@@ -75,10 +75,9 @@ def run():
         addon.setSetting('_restart', '')
 
 def start():
-    run()
-    # xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
+    xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
-    # monitor = xbmc.Monitor()
-    # while not monitor.waitForAbort(1):
-    #     if xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
-    #         run()
+    monitor = xbmc.Monitor()
+    while not monitor.waitForAbort(1):
+        if xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
+            run()
