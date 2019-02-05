@@ -65,11 +65,11 @@ def run():
         f.write(output)
 
     if settings.getBool('restart_pvr', False):
-        xbmc.executebuiltin('InstallAddon(pvr.demo)', True)
-        xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":true}}')
-        xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":false}}')
-        # addon = xbmcaddon.Addon('pvr.iptvsimple')
-        # addon.setSetting('_restart', '')
+        # xbmc.executebuiltin('InstallAddon(pvr.demo)', True)
+        # xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":true}}')
+        # xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":false}}')
+        addon = xbmcaddon.Addon('pvr.iptvsimple')
+        addon.setSetting('_restart', '')
 
     userdata.set('last_run', int(time.time()))
     xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
