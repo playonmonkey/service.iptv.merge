@@ -4,51 +4,81 @@ import shutil
 import StringIO
 import time
 
+import xml.etree.ElementTree as ET
+
 import xbmc, xbmcaddon
 from matthuisman.constants import ADDON_ID, ADDON_PROFILE
 from matthuisman.session import Session
-from matthuisman import settings, userdata
+from matthuisman import settings, userdata, database
 
 from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME
+from .models import IPTV
+
+def process(item):
+    if item.path_type == IPTV.TYPE_REMOTE:
+        r = Session().get(item.path, stream=True)
+        r.raise_for_status()
+        in_file = StringIO.StringIO(r.content)
+    elif item.path_type == IPTV.TYPE_LOCAL:
+        in_file = open(xbmc.translatePath(item.path))
+    elif item.path_type == IPTV.TYPE_ADDON:
+        raise Exception('Not Implemented')
+
+    if item.file_type == IPTV.FILE_GZIP:
+        in_file = gzip.GzipFile(fileobj=in_file)
+
+    return in_file.read()
 
 def run():
     output_dir = settings.get('output_dir')
-    if not output_dir:
-        return
-
     output_dir = xbmc.translatePath(output_dir)
+    out_playlist = ''
 
-    s = Session()
+    database.connect()
+    playlists = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_PLAYLIST, IPTV.enabled == True))
+    epgs      = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_EPG, IPTV.enabled == True))
+    database.close()
 
-    response = s.get('http://i.mjh.nz/au/Sydney/kodi-tv.m3u8', stream=True)
-    response.raise_for_status()
-    with open(os.path.join(output_dir, PLAYLIST_FILE_NAME), 'wb') as handle:
-        for block in response.iter_content(1024):
-            handle.write(block)
+    for playlist in playlists:
+        out_playlist += '\n' + process(playlist)
 
-    url = 'http://i.mjh.nz/nz/epg.xml.gz'
+    with open(os.path.join(output_dir, PLAYLIST_FILE_NAME), 'wb') as f:
+        f.write(out_playlist)
 
-    r = s.get(url, stream=True)
-    in_file = StringIO.StringIO(r.content)
+    channels = []
+    programs = []
 
-    if url.lower().endswith('.gz'):
-        in_file = gzip.GzipFile(fileobj=in_file)
+    for epg in epgs:
+        xml = process(epg)
+        tree = ET.fromstring(xml)
+        channels.extend(tree.findall('channel'))
+        programs.extend(tree.findall('programme'))
 
+    root_element = ET.Element("tv")
+    root_element.set("generator-info-name", "MattHuisman.nz Freeview Scraper")
+
+    root_element.extend(channels)
+    root_element.extend(programs)
+        
+    output = b'<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE tv SYSTEM "xmltv.dtd">\n' +  ET.tostring(root_element, encoding="utf-8")
     with open(os.path.join(output_dir, EPG_FILE_NAME), 'wb') as f:
-        shutil.copyfileobj(in_file, f)
+        f.write(output)
 
     if settings.getBool('restart_pvr', False):
-        xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.iptvsimple","enabled":true}}')
-        addon = xbmcaddon.Addon('pvr.iptvsimple')
-        addon.setSetting('_restart', '')
+        xbmc.executebuiltin('InstallAddon(pvr.demo)', True)
+        xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":true}}')
+        xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":false}}')
+        # addon = xbmcaddon.Addon('pvr.iptvsimple')
+        # addon.setSetting('_restart', '')
 
     userdata.set('last_run', int(time.time()))
     xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
 def start():
-    xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
+    run()
+    # xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
-    monitor = xbmc.Monitor()
-    while not monitor.waitForAbort(1):
-        if xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
-            run()
+    # monitor = xbmc.Monitor()
+    # while not monitor.waitForAbort(1):
+    #     if xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
+    #         run()
