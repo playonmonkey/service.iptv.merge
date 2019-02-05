@@ -55,7 +55,7 @@ def run():
         programs.extend(tree.findall('programme'))
 
     root_element = ET.Element("tv")
-    root_element.set("generator-info-name", "MattHuisman.nz Freeview Scraper")
+    root_element.set("generator-info-name", ADDON_ID)
 
     root_element.extend(channels)
     root_element.extend(programs)
