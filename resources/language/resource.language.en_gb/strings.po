@@ -17,11 +17,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
-msgid "Fetch Every X mins"
+msgid "Generate Every X mins"
 msgstr ""
 
 msgctxt "#30001"
 msgid "Auto Reload IPTV Simple Client"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Generated Files Directory"
 msgstr ""
 
 ##COMMON##
