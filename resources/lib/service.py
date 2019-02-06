@@ -67,17 +67,18 @@ def run():
     userdata.set('last_run', int(time.time()))
     xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
-    if settings.getBool('restart_pvr', False):
-        # xbmc.executebuiltin('InstallAddon(pvr.demo)', True)
-        # xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":true}}')
-        # xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":false}}')
-        addon = xbmcaddon.Addon('pvr.iptvsimple')
-        addon.setSetting('_restart', '')
-
 def start():
+    restart_required = False
+
     xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
     monitor = xbmc.Monitor()
-    while not monitor.waitForAbort(1):
+    while not monitor.waitForAbort(5):
         if xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
-            run()
+            if run() and settings.getBool('restart_pvr', False):
+                restart_required = True
+        
+        if restart_required and not xbmc.getCondVisibility('Pvr.IsPlayingTv') and not xbmc.getCondVisibility('Pvr.IsPlayingRadio'):
+            restart_required = False
+            addon = xbmcaddon.Addon('pvr.iptvsimple')
+            addon.setSetting('_restart', '')
