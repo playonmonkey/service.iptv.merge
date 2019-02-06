@@ -30,42 +30,44 @@ def process(item):
     return in_file.read()
 
 def run():
-    output_dir = settings.get('output_dir')
-    output_dir = xbmc.translatePath(output_dir)
-    out_playlist = ''
+    try:
+        output_dir = settings.get('output_dir')
+        output_dir = xbmc.translatePath(output_dir)
+        out_playlist = ''
 
-    database.connect()
-    playlists = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_PLAYLIST, IPTV.enabled == True))
-    epgs      = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_EPG, IPTV.enabled == True))
-    database.close()
+        database.connect()
+        playlists = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_PLAYLIST, IPTV.enabled == True))
+        epgs      = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_EPG, IPTV.enabled == True))
+        database.close()
 
-    for playlist in playlists:
-        out_playlist += '\n' + process(playlist)
+        for playlist in playlists:
+            out_playlist += '\n' + process(playlist)
 
-    with open(os.path.join(output_dir, PLAYLIST_FILE_NAME), 'wb') as f:
-        f.write(out_playlist)
+        with open(os.path.join(output_dir, PLAYLIST_FILE_NAME), 'wb') as f:
+            f.write(out_playlist)
 
-    channels = []
-    programs = []
+        channels = []
+        programs = []
 
-    for epg in epgs:
-        xml = process(epg)
-        tree = ET.fromstring(xml)
-        channels.extend(tree.findall('channel'))
-        programs.extend(tree.findall('programme'))
+        for epg in epgs:
+            xml = process(epg)
+            tree = ET.fromstring(xml)
+            channels.extend(tree.findall('channel'))
+            programs.extend(tree.findall('programme'))
 
-    root_element = ET.Element("tv")
-    root_element.set("generator-info-name", ADDON_ID)
+        root_element = ET.Element("tv")
+        root_element.set("generator-info-name", ADDON_ID)
 
-    root_element.extend(channels)
-    root_element.extend(programs)
-        
-    output = b'<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE tv SYSTEM "xmltv.dtd">\n' +  ET.tostring(root_element, encoding="utf-8")
-    with open(os.path.join(output_dir, EPG_FILE_NAME), 'wb') as f:
-        f.write(output)
+        root_element.extend(channels)
+        root_element.extend(programs)
+            
+        output = b'<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE tv SYSTEM "xmltv.dtd">\n' +  ET.tostring(root_element, encoding="utf-8")
+        with open(os.path.join(output_dir, EPG_FILE_NAME), 'wb') as f:
+            f.write(output)
 
-    userdata.set('last_run', int(time.time()))
-    xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
+        return True
+    except:
+        return False
 
 def start():
     restart_required = False
@@ -75,8 +77,12 @@ def start():
     monitor = xbmc.Monitor()
     while not monitor.waitForAbort(5):
         if xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
-            if run() and settings.getBool('restart_pvr', False):
-                restart_required = True
+            if run():
+                userdata.set('last_run', int(time.time()))
+                xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
+    
+                if settings.getBool('restart_pvr', False):
+                    restart_required = True
         
         if restart_required and not xbmc.getCondVisibility('Pvr.IsPlayingTv') and not xbmc.getCondVisibility('Pvr.IsPlayingRadio'):
             restart_required = False
