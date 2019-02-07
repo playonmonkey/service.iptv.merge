@@ -29,7 +29,67 @@ msgid "Generated Files Directory"
 msgstr ""
 
 msgctxt "#30003"
-msgid "Force Run Now"
+msgid "IPTV Simple Client Settings"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Add Playlist / EPG"
+msgstr ""
+
+msgctxt "#30005"
+msgid "Generate Now"
+msgstr ""
+
+msgctxt "#30006"
+msgid "Delete"
+msgstr ""
+
+msgctxt "#30007"
+msgid "Are you sure you want to delete?"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Generate started"
+msgstr ""
+
+msgctxt "#30009"
+msgid "{type}: {path}"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Playlist"
+msgstr ""
+
+msgctxt "#30011"
+msgid "EPG"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Choose"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Remote File"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Local File"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Remote File URL"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Select local file"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Standard File"
+msgstr ""
+
+msgctxt "#30018"
+msgid "Gzipped File"
 msgstr ""
 
 ##COMMON##
