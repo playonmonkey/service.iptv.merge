@@ -65,5 +65,6 @@ def generate():
 
 @plugin.route()
 def iptv_simple_settings():
+    xbmc.executebuiltin('InstallAddon({})'.format(IPTV_SIMPLE_ID), True)
     addon = xbmcaddon.Addon(IPTV_SIMPLE_ID)
     addon.openSettings()
