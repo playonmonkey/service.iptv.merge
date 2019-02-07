@@ -1,11 +1,13 @@
+import sys
+import traceback
 from urllib import quote
-
 from contextlib import contextmanager
 
 import xbmcgui, xbmc, xbmcgui
 
-from .constants import ADDON_NAME, ADDON_ICON, ADDON_FANART
+from .constants import ADDON_ID, ADDON_NAME, ADDON_ICON, ADDON_FANART
 from .exceptions import GUIError
+from .language import _
 
 def _make_heading(heading=None):
     return heading if heading else ADDON_NAME
@@ -22,6 +24,20 @@ def refresh():
 def select(heading=None, options=None, **kwargs):
     heading = _make_heading(heading)
     return xbmcgui.Dialog().select(heading, options, **kwargs)
+
+def exception(heading=_.PLUGIN_EXCEPTION):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+
+    tb = []
+    for trace in reversed(traceback.extract_tb(exc_traceback)):
+        if ADDON_ID in trace[0]:
+            trace = list(trace)
+            trace[0] = trace[0].split(ADDON_ID)[1]
+            tb.append(trace)
+
+    error = '{}\n{}'.format(''.join(traceback.format_exception_only(exc_type, exc_value)), ''.join(traceback.format_list(tb)))
+
+    text(error, heading=heading)
 
 @contextmanager
 def progress(message, heading=None, percent=0):

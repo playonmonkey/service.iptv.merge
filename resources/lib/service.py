@@ -7,24 +7,25 @@ import time
 import xml.etree.ElementTree as ET
 
 import xbmc, xbmcaddon
+from matthuisman.log import log
 from matthuisman.constants import ADDON_ID
 from matthuisman.session import Session
-from matthuisman import settings, userdata, database
+from matthuisman import settings, userdata, database, gui
 
-from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, IPTV_SIMPLE_ID
-from .models import IPTV
+from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME
+from .models import Source
 
 def process(item):
-    if item.path_type == IPTV.TYPE_REMOTE:
+    if item.path_type == Source.TYPE_REMOTE:
         r = Session().get(item.path, stream=True)
         r.raise_for_status()
         in_file = StringIO.StringIO(r.content)
-    elif item.path_type == IPTV.TYPE_LOCAL:
+    elif item.path_type == Source.TYPE_LOCAL:
         in_file = open(xbmc.translatePath(item.path))
-    elif item.path_type == IPTV.TYPE_ADDON:
+    elif item.path_type == Source.TYPE_ADDON:
         raise Exception('Not Implemented')
 
-    if item.file_type == IPTV.FILE_GZIP:
+    if item.file_type == Source.FILE_GZIP:
         in_file = gzip.GzipFile(fileobj=in_file)
 
     return in_file.read()
@@ -57,14 +58,13 @@ def merge_epgs(epgs):
     return merged
 
 def run_merge():
-    print("RUN MERGE!")
     output_dir = xbmc.translatePath(settings.get('output_dir'))
     if not output_dir:
         return
 
     database.connect()
-    playlists = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_PLAYLIST))
-    epgs      = list(IPTV.select().where(IPTV.item_type == IPTV.ITEM_EPG))
+    playlists = list(Source.select().where(Source.item_type == Source.PLAYLIST))
+    epgs      = list(Source.select().where(Source.item_type == Source.EPG))
     database.close()
 
     playlist = merge_playlists(playlists)
@@ -76,43 +76,28 @@ def run_merge():
     with open(os.path.join(output_dir, EPG_FILE_NAME), 'wb') as f:
         f.write(epg)
 
-def check_reload():
-    return check_force_flag() or not check_files() or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60
-
-def check_files():
-    output_dir = xbmc.translatePath(settings.get('output_dir'))
-    if not output_dir:
-        print("NO OUTPUT")
-        return True
-
-    return os.path.exists(os.path.join(output_dir, PLAYLIST_FILE_NAME)) and os.path.exists(os.path.join(output_dir, EPG_FILE_NAME))
-
-def check_force_flag():
-    return xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG
-
-def reset_force_flag():
-    xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
-
 def start():
     monitor = xbmc.Monitor()
     restart_required = False
-    reset_force_flag()
 
     while not monitor.waitForAbort(5):
-        if check_reload():
+        forced = xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG
+
+        if forced or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
             try:
                 run_merge()
 
                 if settings.getBool('restart_pvr', False):
                     restart_required = True
-            except:
-                pass
+            except Exception as e:
+                log.exception(e)
+                if forced:
+                    gui.exception()
 
             userdata.set('last_run', int(time.time()))
-            reset_force_flag()
+            xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
         if restart_required and not xbmc.getCondVisibility('Pvr.IsPlayingTv') and not xbmc.getCondVisibility('Pvr.IsPlayingRadio'):
             restart_required = False
-            xbmc.executebuiltin('InstallAddon(pvr.demo)', True)
             xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":true}}')
             xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{"addonid":"pvr.demo","enabled":false}}')

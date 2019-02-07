@@ -80,19 +80,7 @@ def _error(e):
 def _exception(e):
     log.exception(e)
     _close()
-
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-
-    tb = []
-    for trace in reversed(traceback.extract_tb(exc_traceback)):
-        if ADDON_ID in trace[0]:
-            trace = list(trace)
-            trace[0] = trace[0].split(ADDON_ID)[1]
-            tb.append(trace)
-
-    error = '{}\n{}'.format(''.join(traceback.format_exception_only(exc_type, exc_value)), ''.join(traceback.format_list(tb)))
-
-    gui.text(error, heading=_.PLUGIN_EXCEPTION)
+    gui.exception()
     resolve()
 
 @signals.on(signals.AFTER_DISPATCH)

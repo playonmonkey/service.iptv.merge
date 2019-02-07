@@ -4,15 +4,11 @@ class Language(BaseLanguage):
     SETTING_FETCH_EVERY_X  = 30000
     SETTING_AUTO_RELOAD    = 30001
     SETTING_FILES_DIR      = 30002
-    SETTING_IPTV_SIMPLE    = 30003
-
-    ADD_PLAYLIST_EPG       = 30004
-    GENERATE_NOW           = 30005
-
-    DELETE_ITEM            = 30006
-    CONFIRM_DELETE_ITEM    = 30007
-    GENERATE_OK            = 30008
-
+    ADD_SOURCE             = 30004
+    MERGE_NOW              = 30005
+    DELETE_SOURCE          = 30006
+    CONFIRM_DELETE_SOURCE  = 30007
+    MERGE_STARTED          = 30008
     ITEM_LABEL             = 30009
     PLAYLIST               = 30010
     EPG                    = 30011

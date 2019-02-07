@@ -3,7 +3,6 @@
     <setting label="30000" id="reload_time_mins" type="number" default="1440"/>
     <setting label="30001" id="restart_pvr" type="bool" default="true"/>
     <setting label="30002" id="output_dir" type="folder" source="auto" option="writeable"/>
-    <setting label="30003" type="action" action="RunPlugin(plugin://$ID/?_=iptv_simple_settings)" option="close"/>
     <setting type="sep"/>
     <setting label="32019" type="action" action="RunPlugin(plugin://$ID/?_=_reset)"/>
     <setting id="_fresh" type="bool" visible="false" default="true"/>

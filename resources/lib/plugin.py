@@ -4,37 +4,37 @@ from matthuisman import plugin, settings, database, gui
 from matthuisman.constants import ADDON_ID
 
 from .language import _
-from .models import IPTV
-from .constants import FORCE_RUN_FLAG, IPTV_SIMPLE_ID
+from .models import Source
+from .constants import FORCE_RUN_FLAG
 
 @plugin.route('')
 def home():
     folder = plugin.Folder()
 
     database.connect()
-    iptv_items = list(IPTV.select())
+    sources = list(Source.select())
     database.close()
 
-    for iptv_item in iptv_items:
+    for source in sources:
         item = plugin.Item(
-            label = iptv_item.label(),
-            path = plugin.url_for(edit_item, id=iptv_item.id),
+            label = source.label(),
+            path = plugin.url_for(edit_source, id=source.id),
             is_folder = False,
             playable = False,
         )
 
-        item.context.append((_.DELETE_ITEM, 'XBMC.RunPlugin({})'.format(plugin.url_for(delete_item, id=iptv_item.id))))
+        item.context.append((_.DELETE_SOURCE, 'XBMC.RunPlugin({})'.format(plugin.url_for(delete_source, id=source.id))))
 
         folder.add_items([item])
 
     folder.add_item(
-        label = _(_.ADD_PLAYLIST_EPG, _bold=len(iptv_items) == 0), 
-        path  = plugin.url_for(edit_item),
+        label = _(_.ADD_SOURCE, _bold=len(sources) == 0), 
+        path  = plugin.url_for(edit_source),
     )
 
     folder.add_item(
-        label = _.GENERATE_NOW, 
-        path  = plugin.url_for(generate),
+        label = _.MERGE_NOW, 
+        path  = plugin.url_for(merge),
     )
 
     folder.add_item(label=_.SETTINGS, path=plugin.url_for(plugin.ROUTE_SETTINGS))
@@ -42,29 +42,23 @@ def home():
     return folder
 
 @plugin.route()
-def delete_item(id):
-    item = IPTV.get_by_id(id)
-    if gui.yes_no(_.CONFIRM_DELETE_ITEM) and item.delete_instance():
+def delete_source(id):
+    source = Source.get_by_id(id)
+    if gui.yes_no(_.CONFIRM_DELETE_SOURCE) and source.delete_instance():
         gui.refresh()
 
 @plugin.route()
-def edit_item(id=None):
+def edit_source(id=None):
     if id:
-        item = IPTV.get_by_id(id)
+        source = Source.get_by_id(id)
     else:
-        item = IPTV()
+        source = Source()
 
-    if item.wizard():
-        item.save()
+    if source.wizard():
+        source.save()
         gui.refresh()
 
 @plugin.route()
-def generate():
+def merge():
     xbmc.executebuiltin('Skin.SetString({},{})'.format(ADDON_ID, FORCE_RUN_FLAG))
-    gui.notification(_.GENERATE_OK)
-
-@plugin.route()
-def iptv_simple_settings():
-    xbmc.executebuiltin('InstallAddon({})'.format(IPTV_SIMPLE_ID), True)
-    addon = xbmcaddon.Addon(IPTV_SIMPLE_ID)
-    addon.openSettings()
+    gui.notification(_.MERGE_STARTED)

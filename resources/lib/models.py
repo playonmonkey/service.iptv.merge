@@ -4,16 +4,16 @@ from matthuisman import peewee, database, gui
 
 from .language import _
 
-class IPTV(database.Model):
-    ITEM_PLAYLIST = 0
-    ITEM_EPG = 1
+class Source(database.Model):
+    PLAYLIST = 0
+    EPG = 1
 
     TYPE_REMOTE = 0
     TYPE_LOCAL  = 1
     TYPE_ADDON  = 2
 
-    FILE_TEXT = 0
-    FILE_GZIP = 1
+    FILE_STANDARD = 0
+    FILE_GZIP     = 1
 
     item_type     = peewee.IntegerField()
     path_type     = peewee.IntegerField()
@@ -21,13 +21,13 @@ class IPTV(database.Model):
     file_type     = peewee.IntegerField()
 
     def label(self):
-        if self.item_type == self.ITEM_PLAYLIST:
+        if self.item_type == self.PLAYLIST:
             return _(_.ITEM_LABEL, type=_.PLAYLIST, path=self.path)
         else:
             return _(_.ITEM_LABEL, type=_.EPG, path=self.path)
 
     def wizard(self):
-        types = [self.ITEM_PLAYLIST, self.ITEM_EPG]
+        types = [self.PLAYLIST, self.EPG]
         options = [_.PLAYLIST, _.EPG]
 
         index = gui.select(_.CHOOSE, options)
@@ -53,7 +53,7 @@ class IPTV(database.Model):
         if not self.path:
             return False
 
-        types = [self.FILE_TEXT, self.FILE_GZIP]
+        types = [self.FILE_STANDARD, self.FILE_GZIP]
         options = [_.STANDARD_FILE, _.GZIPPED_FILE]
 
         index = gui.select(_.CHOOSE, options)
@@ -64,4 +64,4 @@ class IPTV(database.Model):
 
         return True
 
-database.tables.append(IPTV)
+database.tables.append(Source)
