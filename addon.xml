@@ -10,11 +10,11 @@
     <provides>executable</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <description lang="en"></description>
+    <description lang="en">Easily merge multiple IPTV playlists &amp; EPGs from remote or local sources.</description>
     <reuselanguageinvoker>true</reuselanguageinvoker>
     <license></license>
     <language/>
-    <website></website>
-    <news></news>
+    <website>https://www.matthuisman.nz/2019/02/iptv-merge-kodi-add-on.html</website>
+    <news>Initial release</news>
   </extension>
 </addon>
