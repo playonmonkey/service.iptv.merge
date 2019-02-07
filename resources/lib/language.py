@@ -4,6 +4,7 @@ class Language(BaseLanguage):
     SETTING_FETCH_EVERY_X  = 30000
     SETTING_AUTO_RELOAD    = 30001
     SETTING_FILES_DIR      = 30002
+    UNUSED_PVR_CLIENT      = 30003
     ADD_SOURCE             = 30004
     MERGE_NOW              = 30005
     DELETE_SOURCE          = 30006

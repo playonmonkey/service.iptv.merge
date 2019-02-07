@@ -17,11 +17,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
-msgid "Merge Files Every X mins"
+msgid "Merge Files Every ? mins"
 msgstr ""
 
 msgctxt "#30001"
-msgid "Auto Reload PVR"
+msgid "Auto Reload PVR Manager"
 msgstr ""
 
 msgctxt "#30002"
@@ -86,6 +86,10 @@ msgstr ""
 
 msgctxt "#30018"
 msgid "Gzipped File"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Unused PVR Client Addon ID"
 msgstr ""
 
 ##COMMON##
