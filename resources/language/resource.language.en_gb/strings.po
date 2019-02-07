@@ -25,7 +25,7 @@ msgid "Auto Reload PVR Manager"
 msgstr ""
 
 msgctxt "#30002"
-msgid "Merged Files Output Directory"
+msgid "Output Directory"
 msgstr ""
 
 msgctxt "#30004"
@@ -89,7 +89,7 @@ msgid "Gzipped File"
 msgstr ""
 
 msgctxt "#30019"
-msgid "Unused PVR Client Addon ID"
+msgid "Unused PVR Client Addon"
 msgstr ""
 
 ##COMMON##
