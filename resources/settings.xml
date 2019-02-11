@@ -3,7 +3,7 @@
     <setting label="30000" id="reload_time_mins" type="number" default="1440"/>
     <setting label="30002" id="output_dir" type="folder" source="auto" option="writeable" default="special://temp"/>
     <setting label="30001" id="restart_pvr" type="bool" default="false"/>
-    <setting label="30019" id="unused_pvr_id" type="addon" addontype="xbmc.pvrclient" visible="eq(-1,true)"/>
+    <setting label="30019" id="unused_pvr_id" type="select" default="0" lvalues="30020|30021|30022|30023" visible="eq(-1,true)"/>
     <setting type="sep"/>
     <setting label="32019" type="action" action="RunPlugin(plugin://$ID/?_=_reset)"/>
     <setting id="_fresh" type="bool" visible="false" default="true"/>

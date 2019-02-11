@@ -28,8 +28,12 @@ msgctxt "#30002"
 msgid "Output Directory"
 msgstr ""
 
+msgctxt "#30003"
+msgid "Add EPG"
+msgstr ""
+
 msgctxt "#30004"
-msgid "Add Source"
+msgid "Add Playlist"
 msgstr ""
 
 msgctxt "#30005"
@@ -48,16 +52,12 @@ msgctxt "#30008"
 msgid "Merge started"
 msgstr ""
 
-msgctxt "#30009"
-msgid "{type}: {path}"
-msgstr ""
-
 msgctxt "#30010"
-msgid "Playlist"
+msgid "Playlists"
 msgstr ""
 
 msgctxt "#30011"
-msgid "EPG"
+msgid "EPGs"
 msgstr ""
 
 msgctxt "#30012"
@@ -89,7 +89,23 @@ msgid "Gzipped File"
 msgstr ""
 
 msgctxt "#30019"
-msgid "Unused PVR Client Addon"
+msgid "Unused PVR Client"
+msgstr ""
+
+msgctxt "#30020"
+msgid "Teleboy PVR Client"
+msgstr ""
+
+msgctxt "#30021"
+msgid "PVR Client for sledovanitv.cz"
+msgstr ""
+
+msgctxt "#30022"
+msgid "VBox TV Gateway PVR Client"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Zattoo PVR Client"
 msgstr ""
 
 ##COMMON##

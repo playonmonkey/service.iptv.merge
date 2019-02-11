@@ -21,21 +21,9 @@ class Source(database.Model):
     file_type     = peewee.IntegerField()
 
     def label(self):
-        if self.item_type == self.PLAYLIST:
-            return _(_.ITEM_LABEL, type=_.PLAYLIST, path=self.path)
-        else:
-            return _(_.ITEM_LABEL, type=_.EPG, path=self.path)
+        return self.path
 
     def wizard(self):
-        types = [self.PLAYLIST, self.EPG]
-        options = [_.PLAYLIST, _.EPG]
-
-        index = gui.select(_.CHOOSE, options)
-        if index < 0:
-            return False
-
-        self.item_type = types[index]
-
         types = [self.TYPE_REMOTE, self.TYPE_LOCAL]
         options = [_.REMOTE_PATH, _.LOCAL_PATH]
 

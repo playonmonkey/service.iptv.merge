@@ -10,9 +10,10 @@ import xbmc, xbmcaddon
 from matthuisman.log import log
 from matthuisman.constants import ADDON_ID
 from matthuisman.session import Session
+from matthuisman.exceptions import Error
 from matthuisman import settings, userdata, database, gui
 
-from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME
+from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, PVR_ADDON_IDS
 from .models import Source
 
 def process(item):
@@ -23,7 +24,7 @@ def process(item):
     elif item.path_type == Source.TYPE_LOCAL:
         in_file = open(xbmc.translatePath(item.path))
     elif item.path_type == Source.TYPE_ADDON:
-        raise Exception('Not Implemented')
+        raise Error('Not Implemented')
 
     if item.file_type == Source.FILE_GZIP:
         in_file = gzip.GzipFile(fileobj=in_file)
@@ -100,7 +101,7 @@ def start():
         if restart_required and not xbmc.getCondVisibility('Pvr.IsPlayingTv') and not xbmc.getCondVisibility('Pvr.IsPlayingRadio'):
             restart_required = False
             
-            addon_id = settings.get('unused_pvr_id')
+            addon_id = PVR_ADDON_IDS[settings.getInt('unused_pvr_id')]
             xbmc.executebuiltin('InstallAddon({})'.format(addon_id), True)
             xbmc.executeJSONRPC('{{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{{"addonid":"{}","enabled":true}}}}'.format(addon_id))
             xbmc.executeJSONRPC('{{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{{"addonid":"{}","enabled":false}}}}'.format(addon_id))
