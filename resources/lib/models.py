@@ -16,9 +16,9 @@ class Source(database.Model):
     FILE_GZIP     = 1
 
     item_type     = peewee.IntegerField()
-    path_type     = peewee.IntegerField()
+    path_type     = peewee.IntegerField(default=TYPE_REMOTE)
     path          = peewee.TextField()
-    file_type     = peewee.IntegerField()
+    file_type     = peewee.IntegerField(default=FILE_STANDARD)
 
     def label(self):
         return self.path
@@ -27,7 +27,7 @@ class Source(database.Model):
         types = [self.TYPE_REMOTE, self.TYPE_LOCAL]
         options = [_.REMOTE_PATH, _.LOCAL_PATH]
 
-        index = gui.select(_.CHOOSE, options)
+        index = gui.select(_.CHOOSE, options, preselect=types.index(self.path_type))
         if index < 0:
             return False
 
@@ -44,7 +44,7 @@ class Source(database.Model):
         types = [self.FILE_STANDARD, self.FILE_GZIP]
         options = [_.STANDARD_FILE, _.GZIPPED_FILE]
 
-        index = gui.select(_.CHOOSE, options)
+        index = gui.select(_.CHOOSE, options, preselect=types.index(self.file_type))
         if index < 0:
             return False
 
