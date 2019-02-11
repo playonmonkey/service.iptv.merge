@@ -108,6 +108,10 @@ msgctxt "#30023"
 msgid "Zattoo PVR Client"
 msgstr ""
 
+msgctxt "#30024"
+msgid "PVR Demo Client"
+msgstr ""
+
 ##COMMON##
 
 msgctxt "#32000"
