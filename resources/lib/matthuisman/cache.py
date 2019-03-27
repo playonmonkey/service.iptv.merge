@@ -1,10 +1,11 @@
 from time import time
 from functools import wraps
 
-from . import peewee, database, settings
-from .constants import CACHE_TABLENAME, CACHE_EXPIRY, CACHE_CHECKSUM, CACHE_CLEAN_INTERVAL, CACHE_CLEAN_KEY
+from . import peewee, database, settings, signals, gui, router
+from .constants import CACHE_TABLENAME, CACHE_EXPIRY, CACHE_CHECKSUM, CACHE_CLEAN_INTERVAL, CACHE_CLEAN_KEY, ROUTE_CLEAR_CACHE
 from .util import hash_6
 from .log import log
+from .language import _
 
 funcs   = []
 
@@ -90,8 +91,15 @@ def empty():
     deleted = Cache.truncate()
     log('Cache: Deleted {} Rows'.format(deleted))
 
+@signals.on(signals.BEFORE_DISPATCH)
 def remove_expired():
     deleted = Cache.delete_where(Cache.expires < int(time()))
     log('Cache: Deleted {} Expired Rows'.format(deleted))
+
+@router.route(ROUTE_CLEAR_CACHE)
+def clear_cache(key):
+    delete_count = delete(key)
+    msg = _(_.PLUGIN_CACHE_REMOVED, delete_count=delete_count)
+    gui.notification(msg)
 
 database.tables.append(Cache)

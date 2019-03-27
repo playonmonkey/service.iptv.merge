@@ -97,5 +97,8 @@ def edit_source(id=None, type=None):
 
 @plugin.route()
 def merge():
+    if not settings.get('output_dir'):
+        raise plugin.PluginError(_.NO_OUTPUT_DIR)
+
     xbmc.executebuiltin('Skin.SetString({},{})'.format(ADDON_ID, FORCE_RUN_FLAG))
     gui.notification(_.MERGE_STARTED)

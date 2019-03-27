@@ -58,7 +58,10 @@ def progress(message, heading=None, percent=0):
     finally:
         dialog.close()
 
-def input(message, default='', **kwargs):
+def input(message, default='', hide_input=False, **kwargs):
+    if hide_input:
+        kwargs['option'] = xbmcgui.ALPHANUM_HIDE_INPUT
+        
     return xbmcgui.Dialog().input(message, default, **kwargs)
 
 def ok(message, heading=None):
@@ -111,6 +114,10 @@ class Item(object):
     def is_folder(self): 
         return not self.playable if self._is_folder == None else self._is_folder
 
+    @is_folder.setter
+    def is_folder(self, value):
+        self._is_folder = value
+
     def get_url_headers(self):
         string = ''
         
@@ -125,7 +132,11 @@ class Item(object):
         return string.strip('&')
 
     def get_li(self):
-        li = xbmcgui.ListItem()
+        try:
+            #KODI 18+
+            li = xbmcgui.ListItem(offscreen=True)
+        except:
+            li = xbmcgui.ListItem()
 
         if self.label:
             li.setLabel(self.label)
@@ -160,7 +171,7 @@ class Item(object):
             li.setSubtitles(self.subtitles)
 
         for key in self.properties:
-            li.setProperty(key, self.properties[key])
+            li.setProperty(key, str(self.properties[key]))
 
         headers = self.get_url_headers()
 

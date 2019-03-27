@@ -64,6 +64,10 @@ class BaseLanguage(object):
     NO_RESULTS                  = 32031
     PLUGIN_EXCEPTION            = 32032
     ERROR_DOWNLOADING_FILE      = 32033
+    GENERAL                     = 32034
+    PLAYBACK                    = 32035
+    ADVANCED                    = 32036
+    VERIFY_SSL                  = 32037
 
     def __getattribute__(self, name):
         attr = object.__getattribute__(self, name)

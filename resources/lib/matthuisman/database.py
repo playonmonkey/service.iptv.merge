@@ -5,7 +5,7 @@ try:
 except:
     import pickle
 
-from . import peewee, userdata
+from . import peewee, userdata, signals
 from .constants import DB_PATH, DB_PRAGMAS, DB_MAX_INSERTS, DB_TABLENAME, ADDON_DEV
 from .util import hash_6
 
@@ -119,14 +119,17 @@ def check_tables():
 
             KeyStore.set(key=key, value=checksum)
 
+@signals.on(signals.AFTER_RESET)
 def delete():
     close()
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
 
+@signals.on(signals.ON_CLOSE)
 def close():
     db.close()
 
+@signals.on(signals.BEFORE_DISPATCH)
 def connect():
     db.connect(reuse_if_open=True)
     check_tables()

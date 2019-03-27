@@ -4,7 +4,7 @@ from functools import wraps
 
 import xbmc, xbmcplugin
 
-from . import router, gui, settings, database, cache, userdata, inputstream, signals
+from . import router, gui, settings, userdata, inputstream, signals
 from .constants import ROUTE_SETTINGS, ROUTE_RESET, ROUTE_SERVICE, ROUTE_CLEAR_CACHE, ROUTE_IA_SETTINGS, ROUTE_IA_INSTALL, ADDON_ICON, ADDON_FANART, ADDON_ID
 from .log import log
 from .language import _
@@ -54,11 +54,6 @@ def resolve():
     if _handle() > 0:
         xbmcplugin.endOfDirectory(_handle(), succeeded=False, updateListing=False, cacheToDisc=False)
     
-@signals.on(signals.BEFORE_DISPATCH)
-def _open():
-    database.connect()
-    cache.remove_expired()
-
 @signals.on(signals.ON_ERROR)
 def _error(e):
     try:
@@ -82,10 +77,6 @@ def _exception(e):
     gui.exception()
     resolve()
 
-@signals.on(signals.AFTER_DISPATCH)
-def _close():
-    database.close()
-
 @route('')
 def _home():
     raise PluginError(_.PLUGIN_NO_DEFAULT_ROUTE)
@@ -104,6 +95,10 @@ def reboot():
     _close()
     xbmc.executebuiltin('Reboot')
 
+@signals.on(signals.AFTER_DISPATCH)
+def _close():
+    signals.emit(signals.ON_CLOSE)
+
 @route(ROUTE_SETTINGS)
 def _settings():
     _close()
@@ -116,15 +111,8 @@ def _reset():
         return
 
     userdata.clear()
-    database.delete()
     gui.notification(_.PLUGIN_RESET_OK)
     signals.emit(signals.AFTER_RESET)
-
-@route(ROUTE_CLEAR_CACHE)
-def _clear_cache(key):
-    delete_count = cache.delete(key)
-    msg = _(_.PLUGIN_CACHE_REMOVED, delete_count=delete_count)
-    gui.notification(msg)
 
 @route(ROUTE_SERVICE)
 def _service():
@@ -143,21 +131,11 @@ def _handle():
 #Plugin.Item()
 class Item(gui.Item):
     def __init__(self, cache_key=None, *args, **kwargs):
-        art = kwargs.pop('art', None)
-        if art != False:
-            new_art = {'fanart': ADDON_FANART, 'thumb': ADDON_ICON}
-            if art:
-                for key in art:
-                    if art[key]:
-                        new_art[key] = art[key]
-
-            art = new_art
-
-        super(Item, self).__init__(self, *args, art=art, **kwargs)
+        super(Item, self).__init__(self, *args, **kwargs)
         self.cache_key = cache_key
 
     def get_li(self):
-        if cache.enabled() and self.cache_key:
+        if settings.getBool('use_cache', True) and self.cache_key:
             url = url_for(ROUTE_CLEAR_CACHE, key=self.cache_key)
             self.context.append((_.PLUGIN_CONTEXT_CLEAR_CACHE, 'XBMC.RunPlugin({})'.format(url)))
 
@@ -174,25 +152,36 @@ class Item(gui.Item):
 
 #Plugin.Folder()
 class Folder(object):
-    def __init__(self, items=None, title=None, content='videos', updateListing=False, cacheToDisc=True):
+    def __init__(self, items=None, title=None, content='videos', updateListing=False, cacheToDisc=True, sort_methods=None, thunb=None, fanart=None):
         self.items = items or []
         self.title = title
         self.content = content
         self.updateListing = updateListing
         self.cacheToDisc = cacheToDisc
+        self.sort_methods = sort_methods or [xbmcplugin.SORT_METHOD_UNSORTED, xbmcplugin.SORT_METHOD_LABEL, xbmcplugin.SORT_METHOD_DATEADDED]
+        self.thunb = thunb or ADDON_ICON
+        self.fanart = fanart or ADDON_FANART
 
     def display(self):
+        handle = _handle()
+
         for item in self.items:
             if not item:
                 continue
 
+            item.art['thumb'] = item.art.get('thumb') or self.thunb
+            item.art['fanart'] = item.art.get('fanart') or self.fanart
+
             li = item.get_li()
-            xbmcplugin.addDirectoryItem(_handle(), li.getPath(), li, item.is_folder)
+            xbmcplugin.addDirectoryItem(handle, li.getPath(), li, item.is_folder)
 
-        if self.content: xbmcplugin.setContent(_handle(), self.content)
-        if self.title: xbmcplugin.setPluginCategory(_handle(), self.title)
+        if self.content: xbmcplugin.setContent(handle, self.content)
+        if self.title: xbmcplugin.setPluginCategory(handle, self.title)
 
-        xbmcplugin.endOfDirectory(_handle(), succeeded=True, updateListing=self.updateListing, cacheToDisc=self.cacheToDisc)
+        for sort_method in self.sort_methods:
+            xbmcplugin.addSortMethod(handle, sort_method)
+
+        xbmcplugin.endOfDirectory(handle, succeeded=True, updateListing=self.updateListing, cacheToDisc=self.cacheToDisc)
 
     def add_item(self, *args, **kwargs):
         item = Item(*args, **kwargs)

@@ -15,6 +15,7 @@ from matthuisman import settings, userdata, database, gui
 
 from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, PVR_ADDON_IDS
 from .models import Source
+from .language import _
 
 def process(item):
     if item.path_type == Source.TYPE_REMOTE:
@@ -83,20 +84,27 @@ def start():
 
     while not monitor.waitForAbort(5):
         forced = xbmc.getInfoLabel('Skin.String({})'.format(ADDON_ID)) == FORCE_RUN_FLAG
+        xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
 
         if forced or time.time() - userdata.get('last_run', 0) > settings.getInt('reload_time_mins') * 60:
             try:
                 run_merge()
-
-                if settings.getBool('restart_pvr', False):
-                    restart_required = True
             except Exception as e:
+                result = False
                 log.exception(e)
-                if forced:
-                    gui.exception()
+            else:
+                result = True
 
             userdata.set('last_run', int(time.time()))
-            xbmc.executebuiltin('Skin.SetString({},)'.format(ADDON_ID))
+
+            if result:
+                restart_required = settings.getBool('restart_pvr', False)
+
+                if forced:
+                    gui.notification(_.MERGE_COMPLETE)
+
+            elif forced:
+                gui.exception()
 
         if restart_required and not xbmc.getCondVisibility('Pvr.IsPlayingTv') and not xbmc.getCondVisibility('Pvr.IsPlayingRadio'):
             restart_required = False

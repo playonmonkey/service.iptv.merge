@@ -10,7 +10,7 @@ class Language(BaseLanguage):
     DELETE_SOURCE          = 30006
     CONFIRM_DELETE_SOURCE  = 30007
     MERGE_STARTED          = 30008
-
+    NO_OUTPUT_DIR          = 30009
     PLAYLISTS              = 30010
     EPGS                   = 30011
     CHOOSE                 = 30012
@@ -21,5 +21,11 @@ class Language(BaseLanguage):
     STANDARD_FILE          = 30017
     GZIPPED_FILE           = 30018
     UNUSED_PVR_ADDON       = 30019
+    TELEBOY_CLEITN         = 30020
+    SLEDO_CLIENT           = 30021
+    VBOX_CLIENT            = 30022
+    ZATTOO_CLIENT          = 30023
+    DEMO_CLIENT            = 30024
+    MERGE_COMPLETE         = 30025
 
 _ = Language()

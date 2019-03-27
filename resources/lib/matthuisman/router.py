@@ -69,7 +69,7 @@ def build_url(url, is_live=False, addon_id=ADDON_ID, **kwargs):
     return 'plugin://{0}/?{1}'.format(addon_id, urlencode(params))
 
 # router.dispatch('?_=_settings')
-def dispatch(url):  
+def dispatch(url):
     try:
         signals.emit(signals.BEFORE_DISPATCH)
         function, params = parse_url(url)
