@@ -1,6 +1,6 @@
 import xbmc, xbmcaddon
 
-from matthuisman import plugin, settings, database, gui
+from matthuisman import plugin, settings, gui
 from matthuisman.constants import ADDON_ID
 
 from .language import _
