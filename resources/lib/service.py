@@ -3,6 +3,7 @@ import gzip
 import shutil
 import StringIO
 import time
+import imp
 
 import xml.etree.ElementTree as ET
 
@@ -13,11 +14,11 @@ from matthuisman.session import Session
 from matthuisman.exceptions import Error
 from matthuisman import settings, userdata, database, gui
 
-from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, PVR_ADDON_IDS
+from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, PVR_ADDON_IDS, METHOD_PLAYLIST, METHOD_EPG, MERGE_FILENAME
 from .models import Source
 from .language import _
 
-def process(item):
+def process(item, item_type):
     if item.path_type == Source.TYPE_REMOTE:
         r = Session().get(item.path, stream=True)
         r.raise_for_status()
@@ -25,7 +26,15 @@ def process(item):
     elif item.path_type == Source.TYPE_LOCAL:
         in_file = open(xbmc.translatePath(item.path))
     elif item.path_type == Source.TYPE_ADDON:
-        raise Error('Not Implemented')
+        file_path = os.path.join(item.path, MERGE_FILENAME)
+        module = imp.load_source('', file_path)
+
+        if item_type == Source.PLAYLIST:
+            method = getattr(module, METHOD_PLAYLIST)
+        elif item_type == Source.EPG:
+            method = getattr(module, METHOD_EPG)
+
+        in_file = method()
 
     if item.file_type == Source.FILE_GZIP:
         in_file = gzip.GzipFile(fileobj=in_file)
@@ -36,7 +45,7 @@ def merge_playlists(playlists):
     merged = ''
 
     for playlist in playlists:
-        merged += '\n' + process(playlist)
+        merged += '\n' + process(playlist, Source.PLAYLIST)
 
     return merged
 
@@ -45,7 +54,7 @@ def merge_epgs(epgs):
     programs = []
 
     for epg in epgs:
-        xml = process(epg)
+        xml = process(epg, Source.EPG)
         tree = ET.fromstring(xml)
         channels.extend(tree.findall('channel'))
         programs.extend(tree.findall('programme'))
