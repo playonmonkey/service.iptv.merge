@@ -50,7 +50,10 @@ def process(item, item_type):
         finally:
             sys.path = _opath
             os.chdir(_ocwd)
-            del os.environ['ADDON_ID']
+            os.environ.pop('ADDON_ID', None)
+            for m in sys.modules.keys():
+                if m.startswith(item.path):
+                    del(sys.modules[m])
 
     elif item.path_type == Source.TYPE_REMOTE:
         r = Session().get(item.path, stream=True)
