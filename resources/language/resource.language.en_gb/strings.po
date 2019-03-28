@@ -120,6 +120,15 @@ msgctxt "#30025"
 msgid "Merge Complete"
 msgstr ""
 
+msgctxt "#30026"
+msgid "Add-on"
+msgstr ""
+
+msgctxt "#30027"
+msgid "No IPTV Merge compatible add-ons found.\n"
+"Check the add-on is installed and enabled, then try again."
+msgstr ""
+
 ##COMMON##
 
 msgctxt "#32000"

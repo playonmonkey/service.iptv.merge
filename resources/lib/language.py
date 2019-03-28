@@ -27,5 +27,7 @@ class Language(BaseLanguage):
     ZATTOO_CLIENT          = 30023
     DEMO_CLIENT            = 30024
     MERGE_COMPLETE         = 30025
+    ADDON_SOURCE           = 30026
+    NO_ADDONS              = 30027
 
 _ = Language()
