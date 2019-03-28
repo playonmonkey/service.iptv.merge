@@ -126,7 +126,7 @@ msgstr ""
 
 msgctxt "#30027"
 msgid "No IPTV Merge compatible add-ons found.\n"
-"Check the add-on is installed and enabled, then try again."
+"Check the add-on is installed and then try again."
 msgstr ""
 
 ##COMMON##
