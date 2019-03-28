@@ -30,6 +30,7 @@ def process(item, item_type):
 
             os.chdir(addon_path)
             sys.path.insert(0, addon_path)
+            os.environ['ADDON_ID'] = item.path
 
             f, filename, description = imp.find_module(item.path, [addons_path])
             package = imp.load_module(item.path, f, filename, description)
@@ -49,6 +50,7 @@ def process(item, item_type):
         finally:
             sys.path = _opath
             os.chdir(_ocwd)
+            del os.environ['ADDON_ID']
 
     elif item.path_type == Source.TYPE_REMOTE:
         r = Session().get(item.path, stream=True)
