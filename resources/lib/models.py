@@ -6,7 +6,7 @@ import xbmc, xbmcgui, xbmcaddon
 from matthuisman import peewee, database, gui
 from matthuisman.exceptions import Error
 
-from .constants import MERGE_FILENAME
+from .constants import MERGE_MODULE
 from .language import _
 
 class Source(database.Model):
@@ -91,7 +91,7 @@ class Source(database.Model):
         addons_path = xbmc.translatePath('special://home/addons').decode("utf-8")
         for addon_id in os.listdir(addons_path):
             addon_path = os.path.join(addons_path, addon_id)
-            merge_path = os.path.join(addon_path, MERGE_FILENAME)
+            merge_path = os.path.join(addon_path, MERGE_MODULE+'.py')
 
             if not os.path.exists(merge_path):
                 continue

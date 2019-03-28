@@ -4,6 +4,7 @@ import shutil
 import StringIO
 import time
 import imp
+import sys
 
 import xml.etree.ElementTree as ET
 
@@ -14,24 +15,40 @@ from matthuisman.session import Session
 from matthuisman.exceptions import Error
 from matthuisman import settings, userdata, database, gui
 
-from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, PVR_ADDON_IDS, METHOD_PLAYLIST, METHOD_EPG, MERGE_FILENAME
+from .constants import FORCE_RUN_FLAG, PLAYLIST_FILE_NAME, EPG_FILE_NAME, PVR_ADDON_IDS, METHOD_PLAYLIST, METHOD_EPG, MERGE_MODULE
 from .models import Source
 from .language import _
 
 def process(item, item_type):
     if item.path_type == Source.TYPE_ADDON:
-        addons_path = xbmc.translatePath('special://home/addons').decode("utf-8")
-        addon_path = os.path.join(addons_path, item.path)
-        merge_path = os.path.join(addon_path, MERGE_FILENAME)
+        _opath = sys.path[:]
+        _ocwd = os.getcwd()
 
-        module = imp.load_source('', merge_path)
+        try:
+            addons_path = xbmc.translatePath('special://home/addons').decode("utf-8")
+            addon_path = os.path.join(addons_path, item.path)
 
-        if item_type == Source.PLAYLIST:
-            method = getattr(module, METHOD_PLAYLIST)
-        elif item_type == Source.EPG:
-            method = getattr(module, METHOD_EPG)
+            os.chdir(addon_path)
+            sys.path.insert(0, addon_path)
 
-        return method()
+            f, filename, description = imp.find_module(item.path, [addons_path])
+            package = imp.load_module(item.path, f, filename, description)
+
+            f, filename, description = imp.find_module(MERGE_MODULE, package.__path__)
+            try:
+                module = imp.load_module('{}.{}'.format(item.path, MERGE_MODULE), f, filename, description)
+
+                if item_type == Source.PLAYLIST:
+                    method = getattr(module, METHOD_PLAYLIST)
+                elif item_type == Source.EPG:
+                    method = getattr(module, METHOD_EPG)
+
+                return method()
+            finally:
+                f.close()
+        finally:
+            sys.path = _opath
+            os.chdir(_ocwd)
 
     elif item.path_type == Source.TYPE_REMOTE:
         r = Session().get(item.path, stream=True)
