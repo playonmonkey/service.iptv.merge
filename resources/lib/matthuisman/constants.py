@@ -3,7 +3,7 @@ import os
 import xbmc, xbmcaddon
 
 ##### ADDON ####
-ADDON          = xbmcaddon.Addon()
+ADDON          = xbmcaddon.Addon(os.environ.get('ADDON_ID', ''))
 ADDON_ID       = ADDON.getAddonInfo('id')
 ADDON_VERSION  = ADDON.getAddonInfo('version')
 ADDON_NAME     = ADDON.getAddonInfo('name')

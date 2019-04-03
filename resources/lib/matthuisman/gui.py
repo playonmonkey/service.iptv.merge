@@ -53,8 +53,6 @@ def progress(message, heading=None, percent=0):
 
     try:
         yield dialog
-    except:
-        raise GUIError('Progress dialog error')
     finally:
         dialog.close()
 
